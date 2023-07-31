@@ -81,9 +81,7 @@ class RateLimiter(object):
         self.used = int(response_headers["x-ratelimit-used"])
         self.reset_timestamp = now + seconds_to_reset
 
-        if self.window_size is None:
-            self.window_size = seconds_to_reset + self.used
-        elif self.window_size < seconds_to_reset:
+        if self.window_size is None or self.window_size < seconds_to_reset:
             self.window_size = seconds_to_reset
 
         if self.remaining <= 0:
@@ -97,8 +95,8 @@ class RateLimiter(object):
                 max(
                     seconds_to_reset
                     - (
-                            self.window_size
-                            - (self.window_size / (
+                            600 if self.window_size is None else self.window_size
+                            - (600 if self.window_size is None else self.window_size / (
                                 self.remaining + self.used) * self.used)
                     ),
                     0,
